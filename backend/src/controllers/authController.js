@@ -19,14 +19,21 @@ export const signUp = async (req, res) => {
     }
 
     // kiểm tra username tồn tại chưa
-    const duplicate = await User.findOne({ username });
+    const duplicateUsername = await User.findOne({ username });
 
-    if (duplicate) {
-      return res.status(409).json({ message: "username đã tồn tại" });
+    if (duplicateUsername) {
+      return res.status(409).json({ message: "Username đã tồn tại" });
+    }
+
+    // kiểm tra email tồn tại chưa
+    const duplicateEmail = await User.findOne({ email });
+
+    if (duplicateEmail) {
+      return res.status(409).json({ message: "Email đã tồn tại" });
     }
 
     // mã hoá password
-    const hashedPassword = await bcrypt.hash(password, 10); // salt = 10
+    const hashedPassword = await bcrypt.hash(password, 10); 
 
     // tạo user mới
     await User.create({
@@ -54,12 +61,15 @@ export const signIn = async (req, res) => {
     }
 
     // lấy hashedPassword trong db để so với password input
-    const user = await User.findOne({ username });
+    // tìm bằng username hoặc email
+    const user = await User.findOne({
+      $or: [{ username }, { email: username }],
+    });
 
     if (!user) {
       return res
         .status(401)
-        .json({ message: "username hoặc password không chính xác" });
+        .json({ message: "Tên đăng nhập/email hoặc mật khẩu không chính xác" });
     }
 
     // kiểm tra password
@@ -68,7 +78,7 @@ export const signIn = async (req, res) => {
     if (!passwordCorrect) {
       return res
         .status(401)
-        .json({ message: "username hoặc password không chính xác" });
+        .json({ message: "Tên đăng nhập/email hoặc mật khẩu không chính xác" });
     }
 
     // nếu khớp, tạo accessToken với JWT

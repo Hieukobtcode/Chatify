@@ -1,0 +1,266 @@
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "../ui/label";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useNavigate } from "react-router";
+
+const signUpSchema = z
+  .object({
+    firstname: z
+      .string()
+      .min(1, "Tên bắt buộc phải có")
+      .max(50, "Tên không được vượt quá 50 ký tự")
+      .regex(/^[A-Za-zÀ-ỹ\s]+$/, "Tên chỉ được chứa chữ cái và khoảng trắng"),
+    lastname: z
+      .string()
+      .min(1, "Họ bắt buộc phải có")
+      .max(50, "Họ không được vượt quá 50 ký tự")
+      .regex(/^[A-Za-zÀ-ỹ\s]+$/, "Họ chỉ được chứa chữ cái và khoảng trắng"),
+    username: z
+      .string()
+      .min(3, "Tên đăng nhập phải có ít nhất 3 ký tự")
+      .max(30, "Tên đăng nhập không được vượt quá 30 ký tự")
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới"
+      ),
+    email: z
+      .string()
+      .min(1, "Email bắt buộc phải có")
+      .email("Email không hợp lệ")
+      .max(255, "Email không được vượt quá 255 ký tự"),
+    password: z
+      .string()
+      .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+      .max(128, "Mật khẩu không được vượt quá 128 ký tự")
+      .regex(/[A-Z]/, "Mật khẩu phải chứa ít nhất 1 chữ cái viết hoa")
+      .regex(/[a-z]/, "Mật khẩu phải chứa ít nhất 1 chữ cái viết thường")
+      .regex(/[0-9]/, "Mật khẩu phải chứa ít nhất 1 chữ số")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt"
+      ),
+    confirmPassword: z
+      .string()
+      .min(1, "Vui lòng xác nhận mật khẩu"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Mật khẩu xác nhận không khớp",
+    path: ["confirmPassword"],
+  });
+
+type SignUpFormValues = z.infer<typeof signUpSchema>;
+
+export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
+  const { signUp } = useAuthStore();
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+  });
+
+  const onSubmit = async (data: SignUpFormValues) => {
+    const { firstname, lastname, username, email, password } = data;
+
+    // gọi backend để signup
+    const success = await signUp(username, password, email, firstname, lastname);
+
+    if (success) {
+      navigate("/signin");
+    }
+  };
+
+  return (
+    <div
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+    >
+      <Card className="overflow-hidden p-0 border-border">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form
+            className="p-6 md:p-8"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <div className="flex flex-col gap-6">
+              {/* header - logo */}
+              <div className="flex flex-col items-center text-center gap-2">
+                <a
+                  href="/"
+                  className="mx-auto block w-fit text-center"
+                >
+                  <img
+                    src="/logo.svg"
+                    alt="logo"
+                  />
+                </a>
+
+                <h1 className="text-2xl font-bold">Tạo tài khoản Chatify</h1>
+                <p className="text-muted-foreground text-balance">
+                  Chào mừng bạn! Hãy đăng ký để bắt đầu!
+                </p>
+              </div>
+
+              {/* họ & tên */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="lastname"
+                    className="block text-sm"
+                  >
+                    Họ
+                  </Label>
+                  <Input
+                    type="text"
+                    id="lastname"
+                    {...register("lastname")}
+                  />
+
+                  {errors.lastname && (
+                    <p className="text-destructive text-sm">
+                      {errors.lastname.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="fistname"
+                    className="block text-sm"
+                  >
+                    Tên
+                  </Label>
+                  <Input
+                    type="text"
+                    id="firstname"
+                    {...register("firstname")}
+                  />
+                  {errors.firstname && (
+                    <p className="text-destructive text-sm">
+                      {errors.firstname.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* username */}
+              <div className="flex flex-col gap-3">
+                <Label
+                  htmlFor="username"
+                  className="block text-sm"
+                >
+                  Tên đăng nhập
+                </Label>
+                <Input
+                  type="text"
+                  id="username"
+                  placeholder="Chatify"
+                  {...register("username")}
+                />
+                {errors.username && (
+                  <p className="text-destructive text-sm">
+                    {errors.username.message}
+                  </p>
+                )}
+              </div>
+
+              {/* email */}
+              <div className="flex flex-col gap-3">
+                <Label
+                  htmlFor="email"
+                  className="block text-sm"
+                >
+                  Email
+                </Label>
+                <Input
+                  type="email"
+                  id="email"
+                  placeholder="m@gmail.com"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-destructive text-sm">{errors.email.message}</p>
+                )}
+              </div>
+
+              {/* password */}
+              <div className="flex flex-col gap-3">
+                <Label
+                  htmlFor="password"
+                  className="block text-sm"
+                >
+                  Mật khẩu
+                </Label>
+                <PasswordInput
+                  id="password"
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-destructive text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              {/* confirm password */}
+              <div className="flex flex-col gap-3">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="block text-sm"
+                >
+                  Xác nhận mật khẩu
+                </Label>
+                <PasswordInput
+                  id="confirmPassword"
+                  {...register("confirmPassword")}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-destructive text-sm">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {/* nút đăng ký */}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                Tạo tài khoản
+              </Button>
+
+              <div className="text-center text-sm">
+                Đã có tài khoản?{" "}
+                <a
+                  href="/signin"
+                  className="underline underline-offset-4"
+                >
+                  Đăng nhập
+                </a>
+              </div>
+            </div>
+          </form>
+          <div className="bg-muted relative hidden md:block">
+            <img
+              src="/placeholderSignUp.png"
+              alt="Image"
+              className="absolute top-1/2 -translate-y-1/2 object-cover"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      <div className=" text-xs text-balance px-6 text-center *:[a]:hover:text-primary text-muted-foreground *:[a]:underline *:[a]:underline-offetset-4">
+        Bằng cách tiếp tục, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a> và{" "}
+        <a href="#">Chính sách bảo mật</a> của chúng tôi.
+      </div>
+    </div>
+  );
+}
