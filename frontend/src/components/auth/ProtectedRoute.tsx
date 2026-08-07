@@ -41,7 +41,7 @@ const ProtectedRoute = () => {
         <LoaderIcon
           role="status"
           aria-label="Loading"
-          className={cn("size-4 animate-spin")}
+          className="size-4 animate-spin dark:text-white"
         />
       </div>
     );
