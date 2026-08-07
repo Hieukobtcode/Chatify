@@ -5,11 +5,10 @@ const ChatAppPage = () => {
 
   return (
     <SidebarProvider>
-      <AppSidebar>
-        <div className="flex h-screen w-full p-2">
-          <ChatWindowLayout/>
-        </div>
-      </AppSidebar>
+      <AppSidebar />
+      <div className="flex h-screen w-full p-2">
+        <ChatWindowLayout />
+      </div>
     </SidebarProvider>
   );
 
