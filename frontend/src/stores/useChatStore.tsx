@@ -100,9 +100,58 @@ export const useChatStore = create<ChatState>()(
                         conversations: state.conversations.map((c) => c._id === get().activeConversationId ? { ...c, seenBy: [] } : c)
                     }))
                 } catch (error) {
-                    console.log("Loi xay ra khi gui gropu message:",error)
+                    console.log("Loi xay ra khi gui gropu message:", error)
                 }
-            }
+            },
+
+            addMessage: async (message) => {
+                try {
+                    const { user } = useAuthStore.getState();
+                    const { fetchMessage } = get();
+
+                    message.isOwn = message.senderId === user?._id;
+
+                    const convoId = message.conversationId;
+
+                    let preItems = get().messages[convoId]?.items ?? [];
+
+                    if (preItems.length === 0) {
+                        await fetchMessage(convoId);
+
+                        preItems = get().messages[convoId]?.items ?? [];
+                    }
+
+                    set((state) => {
+                        // Tin nhắn đã tồn tại
+                        if (preItems.some((m) => m._id === message._id)) {
+                            return state;
+                        }
+
+                        const currentConversation = state.messages[convoId];
+
+                        return {
+                            messages: {
+                                ...state.messages,
+
+                                [convoId]: {
+                                    items: [...preItems, message],
+                                    hasMore: currentConversation?.hasMore ?? false,
+                                    nextCursor: currentConversation?.nextCursor ?? null,
+                                },
+                            },
+                        };
+                    });
+                } catch (error) {
+                    console.log("Lỗi xảy ra khi add message:", error);
+                }
+            },
+
+            updateConversation: (conversation) => {
+                set((state) => ({
+                    conversations: state.conversations.map((c) => c._id === conversation._id ? { ...c, ...conversation } : c),
+                }))
+            },
+            
         }), {
         name: "chat-storage",
         partialize: (state) => ({ conversations: state.conversations })
