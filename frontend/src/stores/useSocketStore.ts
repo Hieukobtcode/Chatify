@@ -7,6 +7,7 @@ const baseURL = import.meta.env.VITE_SOCKET_URL
 
 export const useSocketStore = create<SocketState>((set,get) => ({
     socket:null,
+    onlineUsers:[],
 
     connectSocket: () =>  {
         const accessToken = useAuthStore.getState().accessToken;
@@ -23,6 +24,11 @@ export const useSocketStore = create<SocketState>((set,get) => ({
 
         socket.on("connect", () => {
             console.log("Connected socket")
+        })
+
+        //oinline users
+        socket.on("online_users", (userIds) => {
+            set({onlineUsers:userIds})
         })
     },
 

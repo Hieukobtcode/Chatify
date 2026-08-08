@@ -15,12 +15,20 @@ const io = new Server(server, {
 });
 io.use(socketAuthMiddleware)
 
+const onlineUsers = new Map(); // {userId : socketId}
+
 io.on("connection", async (socket) => {
     const user = socket.user;
     console.log(`${user.displayName} online voi soket ${socket.id}`);
 
+    onlineUsers.set(user._id, socket.id);
+
+    io.emit("online-users", Array.from(onlineUsers.keys()))
+
     socket.on("disconnect", () => {
-        console.log(`Socket disconnected: ${socket.id}`)
+        onlineUsers.delete(user._id)
+        io.emit("online-users", Array.from(onlineUsers.keys()))
+        console.log(`Socket disconnected: ${socket.id}`);
     })
 })
 

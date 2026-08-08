@@ -6,10 +6,12 @@ import { Separator } from "@base-ui/react";
 import UserAvatar from "../../shared/UserAvatar";
 import StatusBadge from "../../shared/StatusBadge";
 import GroupChatAvatar from "../../sidebar/GroupChatAvatar";
+import { useSocketStore } from "@/stores/useSocketStore";
 
 const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
   const { user } = useAuthStore();
   const { conversations, activeConversationId } = useChatStore();
+  const {onlineUsers} = useSocketStore();
   let otherUser;
 
   chat = chat ?? conversations.find((c) => c._id === activeConversationId)
@@ -39,7 +41,8 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
               chat.type === "direct" ? (
                 <>
                   <UserAvatar type={"sidebar"} name={otherUser?.displayName || "Chatify"} avatarUrl={otherUser?.avatarUrl || undefined} />
-                  <StatusBadge status="offline" /></>
+                  <StatusBadge status={onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"} />
+                  </>
               ) : (
                 <GroupChatAvatar participants={chat.participants} type="sidebar"  />
               )
