@@ -41,5 +41,7 @@ export interface ChatState{
   reset: () => void;
   setActiveConversation: (id:string | null) => void;
   fetchConversatons: () => Promise<void>;
-  fetchMessage:(conversationId?:string) => Promise<void>
+  fetchMessage:(conversationId?:string) => Promise<void>;
+  sendDirectMessage:(recipientId:string,content:string,imgUrl?:string) => Promise<void>;
+  sendGroupMessage:(conversationId:string,content:string,imgUrl?:string) => Promise<void>
 }

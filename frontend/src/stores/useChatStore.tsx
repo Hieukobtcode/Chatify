@@ -55,29 +55,52 @@ export const useChatStore = create<ChatState>()(
                     const { messages: fetched, cursor } = await chatService.fetchMessage(convoId, nextCursor);
                     const processed = fetched.map((m) => ({
                         ...m,
-                        isOwn:m.senderId === user?._id
+                        isOwn: m.senderId === user?._id
                     }))
 
-                    set( (state) => {
+                    set((state) => {
                         const prev = state.messages[convoId]?.items ?? [];
                         const merged = prev.length > 0 ? [...processed, ...prev] : processed;
 
                         return {
-                            messages:{
+                            messages: {
                                 ...state.messages,
-                                [convoId] : {
-                                    items:merged,
-                                    hasMore:!!cursor,
-                                    nextCursor:cursor ?? null,
+                                [convoId]: {
+                                    items: merged,
+                                    hasMore: !!cursor,
+                                    nextCursor: cursor ?? null,
                                 }
                             }
                         }
                     })
 
                 } catch (error) {
-                    console.error("Loi xay ra khi fetch Message:",error);
-                } finally{
-                    set({messageLoading:false})
+                    console.error("Loi xay ra khi fetch Message:", error);
+                } finally {
+                    set({ messageLoading: false })
+                }
+            },
+
+            sendDirectMessage: async (recipientId, content, imgUrl) => {
+                try {
+                    const { activeConversationId } = get();
+                    await chatService.sendDirectMessage(recipientId, content, imgUrl, activeConversationId || undefined)
+                    set((state) => ({
+                        conversations: state.conversations.map((c) => c._id === activeConversationId ? { ...c, seenBy: [] } : c)
+                    }))
+                } catch (error) {
+                    console.error("Loi xay ra khi gui direct message:", error)
+                }
+            },
+
+            sendGroupMessage: async (conversationId, content, imgUrl) => {
+                try {
+                    await chatService.sendGroupMessage(conversationId, content, imgUrl);
+                    set((state) => ({
+                        conversations: state.conversations.map((c) => c._id === get().activeConversationId ? { ...c, seenBy: [] } : c)
+                    }))
+                } catch (error) {
+                    console.log("Loi xay ra khi gui gropu message:",error)
                 }
             }
         }), {

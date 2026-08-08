@@ -3,19 +3,29 @@ import type { ConversationResponse, Message } from "@/types/chat";
 
 interface FetchMessageProps {
     messages: Message[];
-    cursor?:string
+    cursor?: string
 }
 
 const pageLimit = 50;
 
 export const chatService = {
-    async fetchConversations() : Promise<ConversationResponse>{
+    async fetchConversations(): Promise<ConversationResponse> {
         const res = await api.get("/conversations");
         return res.data;
     },
 
-    async fetchMessage(id:string, cursor:string) : Promise<FetchMessageProps> {
+    async fetchMessage(id: string, cursor: string): Promise<FetchMessageProps> {
         const res = await api.get(`/conversation/${id}/message?limit=${pageLimit}&cursor=${cursor}`)
-        return {messages: res.data.m.messages, cursor: res.data.nextCursor}
+        return { messages: res.data.m.messages, cursor: res.data.nextCursor }
+    },
+
+    async sendDirectMessage(recipientId: string, content: string = "", imgUrl?:string, conversationId?:string){
+        const res = await api.post("/messages/direct",{recipientId,content,imgUrl,conversationId})
+        return res.data.message
+    },
+
+    async sendGroupMessage(conversationId:string,content:string = "",imgUrl?:string){
+        const res = await api.post("/messages/group",{conversationId,content,imgUrl})
+        return res.data.message
     }
 }
