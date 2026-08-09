@@ -2,7 +2,6 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useEffect, useRef, useState } from "react";
 import { Navigate, Outlet } from "react-router";
 import { LoaderIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const ProtectedRoute = () => {
   const { accessToken, user, loading, refresh, fetchMe, clearState } =

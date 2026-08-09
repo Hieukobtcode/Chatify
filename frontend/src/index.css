@@ -286,6 +286,11 @@
     dark:scrollbar-thumb-slate-600;
   }
 
+  .success-message{
+    @apply text-sm text-emerald-500
+  }
+
+
   /* Animations */
   .transition-bounce {
     transition: var(--transition-bounce);
