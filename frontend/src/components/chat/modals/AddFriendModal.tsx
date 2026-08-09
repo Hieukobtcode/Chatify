@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useFriendStore } from "@/stores/useFriendRequest";
+import { useFriendStore } from "@/stores/useFriendStore";
 import type { User } from "@/types/user";
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
