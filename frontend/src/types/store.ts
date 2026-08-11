@@ -8,6 +8,7 @@ export interface AuthState {
   loading: boolean;
 
   setAccessToken: (accessToken: string) => void;
+  setUser: (user: User) => void;
   clearState: () => void;
   signUp: (
     username: string,
@@ -41,7 +42,7 @@ export interface ChatState {
   activeConversationId: string | null;
   convoLoading: boolean;
   messageLoading: boolean;
-  loading:boolean;
+  loading: boolean;
   reset: () => void;
   setActiveConversation: (id: string | null) => void;
   fetchConversatons: () => Promise<void>;
@@ -62,8 +63,12 @@ export interface ChatState {
   //update convo
   updateConversation: (conversation: Conversation) => void;
   markAsSeen: () => Promise<void>;
-  addConvo:(convo:Conversation) => void;
-  createConversation:(type:"group" | "direct", name:string, memberIds:string[]) => Promise<void>;
+  addConvo: (convo: Conversation) => void;
+  createConversation: (
+    type: "group" | "direct",
+    name: string,
+    memberIds: string[],
+  ) => Promise<void>;
 }
 
 export interface SocketState {
@@ -84,4 +89,8 @@ export interface FriendState {
   acceptRequest: (requestId: string) => Promise<void>;
   declineRequest: (requestId: string) => Promise<void>;
   getFriends: () => Promise<void>;
+}
+
+export interface UserState {
+  updateAvatarUrl: (formData: FormData) => Promise<void>;
 }
