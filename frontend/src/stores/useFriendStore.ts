@@ -3,6 +3,7 @@ import type { FriendState } from "@/types/store";
 import { create } from "zustand";
 
 export const useFriendStore = create<FriendState>((set, get) => ({
+  friends: [],
   loading: false,
   receivedList: [],
   sendList: [],
@@ -41,20 +42,20 @@ export const useFriendStore = create<FriendState>((set, get) => ({
 
       if (!result) return;
 
-      const {received,sent} = result;
+      const { received, sent } = result;
 
-      set({receivedList:received,sendList:sent});
+      set({ receivedList: received, sendList: sent });
 
     } catch (error) {
-      console.error("Loi xay ra khi get all friend:",error)
-    } finally{
-      set({loading:false})
+      console.error("Loi xay ra khi get all friend:", error)
+    } finally {
+      set({ loading: false })
     }
   },
 
   acceptRequest: async (requestId) => {
     try {
-      set({loading:true});
+      set({ loading: true });
 
       await friendService.acceptRequest(requestId);
 
@@ -62,25 +63,38 @@ export const useFriendStore = create<FriendState>((set, get) => ({
         receivedList: state.receivedList.filter((r) => r._id !== requestId)
       }))
     } catch (error) {
-      console.error("Loi khi chap nhan yeu cau ket ban:",error)
-    } finally{
-      set({loading:false})
+      console.error("Loi khi chap nhan yeu cau ket ban:", error)
+    } finally {
+      set({ loading: false })
     }
   },
 
   declineRequest: async (requestId) => {
     try {
-      set({loading:true})
+      set({ loading: true })
 
       await friendService.declineRequest(requestId);
 
       set((state) => ({
-        receivedList:state.receivedList.filter((r) => r._id !== requestId)
+        receivedList: state.receivedList.filter((r) => r._id !== requestId)
       }))
     } catch (error) {
       console.error("Loi khi tu choi loi moi ket ban:", error)
-    } finally{
-      set({loading:false})
+    } finally {
+      set({ loading: false })
     }
   },
+
+  getFriends: async () => {
+    try {
+      set({ loading: true })
+      const friends = await friendService.getFriendList();
+      set({ friends: friends })
+    } catch (error) {
+      console.log("Loi xay ra khi load friends:", error)
+      set({ friends: [] })
+    } finally {
+      set({ loading: false })
+    }
+  }
 }));

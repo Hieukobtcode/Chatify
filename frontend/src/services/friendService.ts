@@ -37,4 +37,9 @@ export const friendService = {
       console.error("Loi khi gui declien request:", error);
     }
   },
+
+  async getFriendList() {
+    const res = await api.get("/friends");
+    return res.data.friends;
+  }
 };
