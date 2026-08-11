@@ -94,6 +94,7 @@ const NewGroupChatModal = () => {
                 className="glass border-border/50 focus:border-primary/50 transition-smooth"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
+                required
               />
             </div>
 
@@ -107,7 +108,6 @@ const NewGroupChatModal = () => {
                 placeholder="Tìm theo tên hiển thị..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                required
               />
 
               {/* Danh sach goi y theo tim kiem */}
