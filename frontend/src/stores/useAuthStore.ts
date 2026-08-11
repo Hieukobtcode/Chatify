@@ -22,8 +22,17 @@ export const useAuthStore = create<AuthState>()(
     clearState: () => {
       set({ accessToken: null, user: null, loading: false });
       useChatStore.getState().reset();
+
+      // Lưu theme trước khi xoá localStorage để không mất dark mode
+      const themeData = localStorage.getItem("theme-storage");
+
       localStorage.clear();
       sessionStorage.clear();
+
+      // Khôi phục theme sau khi clear
+      if (themeData) {
+        localStorage.setItem("theme-storage", themeData);
+      }
     },
 
     signUp: async (username, password, email, firstName, lastName) => {
@@ -111,9 +120,13 @@ export const useAuthStore = create<AuthState>()(
         if (!user) {
           await fetchMe();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
-        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        // 401 = không có cookie → user đã logout, không cần toast
+        // 403 = token hết hạn / không hợp lệ → cần thông báo
+        if (error?.response?.status !== 401) {
+          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        }
         get().clearState();
       } finally {
         set({ loading: false });
