@@ -42,7 +42,7 @@ const NewGroupChatModal = () => {
     setInvitedUsers(invitedUsers.filter((u) => u._id !== friend._id));
   };
 
-  const hanldleGetFriends = async () => {
+  const handleGetFriends = async () => {
     await getFriends();
   };
 
@@ -68,15 +68,17 @@ const NewGroupChatModal = () => {
   };
   return (
     <Dialog>
-      <DialogTrigger>
-        <Button
-          variant={"ghost"}
-          onClick={hanldleGetFriends}
-          className="flex z-10 justify-center items-center size-5 rounded-full hover:bg-sidebar-accent transition cursor-pointer"
-        >
-          <User className="size-4" />
-          <span className="sr-only">Tạo nhóm</span>
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            onClick={handleGetFriends}
+            className="flex z-10 justify-center items-center size-5 rounded-full hover:bg-sidebar-accent transition cursor-pointer"
+          />
+        }
+      >
+        <User className="size-4" />
+        <span className="sr-only">Tạo nhóm</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] border-none">
         <DialogHeader>

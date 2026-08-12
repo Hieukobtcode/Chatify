@@ -28,6 +28,17 @@ const ChatWindowBody = () => {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Fetch initial messages when opening a conversation
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    // Only fetch if we haven't loaded messages for this conversation yet
+    const existing = allMessages[activeConversationId];
+    if (!existing || existing.items.length === 0) {
+      fetchMessage(activeConversationId);
+    }
+  }, [activeConversationId, allMessages, fetchMessage]);
+
   useEffect(() => {
     const lastMessage = selectedConvo?.lastMessage;
     if (!lastMessage) {
@@ -39,17 +50,16 @@ const ChatWindowBody = () => {
     setLastMessageStatus(seenBy.length > 0 ? "seen" : "delivered");
   }, [selectedConvo]);
 
-  //keo xuong duoi khi load convo
+  // Scroll to bottom when conversation changes or new messages arrive
   useLayoutEffect(() => {
     if (!messageEndRef.current) {
       return;
     }
 
     messageEndRef.current.scrollIntoView({
-      // behavior: "smooth",
       block: "end",
     });
-  }, [activeConversationId]);
+  }, [activeConversationId, messages.length]);
 
   if (!selectedConvo) {
     return <ChatWelcomeScreen />;
@@ -89,13 +99,13 @@ const ChatWindowBody = () => {
     }
 
     const item = sessionStorage.getItem(key);
-    if(item){
-      const {scrollTop} = JSON.parse(item);
+    if (item) {
+      const { scrollTop } = JSON.parse(item);
       requestAnimationFrame(() => {
         container.scrollTop = scrollTop;
-      })
+      });
     }
-  },[messages.length]);
+  }, [messages.length, key, activeConversationId]);
 
   if (!messages?.length) {
     return (
@@ -106,12 +116,12 @@ const ChatWindowBody = () => {
   }
 
   return (
-    <div className="p-4 bg-primary-foreground h-full flex flex-col overflow-hidden ">
+    <div className="p-4 bg-primary-foreground h-full flex flex-col overflow-hidden">
       <div
         id="scrollableDiv"
         ref={containerRef}
         onScroll={handleScrollSave}
-        className="flex flex-col-reverse overflow-y-auto overflow-x-hidden beautuful-scrollbar"
+        className="flex flex-col-reverse overflow-y-auto overflow-x-hidden beautiful-scrollbar"
       >
         <div ref={messageEndRef}></div>
         <Infinitive
@@ -141,8 +151,6 @@ const ChatWindowBody = () => {
       </div>
     </div>
   );
-
-  return <div>ChatWindowBody</div>;
 };
 
 export default ChatWindowBody;

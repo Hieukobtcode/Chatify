@@ -4,7 +4,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
@@ -75,12 +74,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Dirrect Message */}
+        {/* Direct Message */}
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase">Bạn bè</SidebarGroupLabel>
-          <SidebarGroupAction title="Kết bạn" className="cursor-pointer">
-            <AddFriendModal />
-          </SidebarGroupAction>
+          <AddFriendModal />
           <SidebarGroupContent>
             <DirectMesageList />
           </SidebarGroupContent>

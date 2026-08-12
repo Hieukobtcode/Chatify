@@ -2,7 +2,7 @@ import { friendService } from "@/services/friendService";
 import type { FriendState } from "@/types/store";
 import { create } from "zustand";
 
-export const useFriendStore = create<FriendState>((set, get) => ({
+export const useFriendStore = create<FriendState>((set) => ({
   friends: [],
   loading: false,
   receivedList: [],
@@ -57,13 +57,16 @@ export const useFriendStore = create<FriendState>((set, get) => ({
     try {
       set({ loading: true });
 
-      await friendService.acceptRequest(requestId);
+      const data = await friendService.acceptRequest(requestId);
+      const newFriend = data?.newFriend;
 
       set((state) => ({
-        receivedList: state.receivedList.filter((r) => r._id !== requestId)
+        receivedList: state.receivedList.filter((r) => r._id !== requestId),
+        friends: newFriend ? [...state.friends, newFriend] : state.friends,
       }))
     } catch (error) {
       console.error("Loi khi chap nhan yeu cau ket ban:", error)
+      throw error;
     } finally {
       set({ loading: false })
     }
@@ -80,6 +83,7 @@ export const useFriendStore = create<FriendState>((set, get) => ({
       }))
     } catch (error) {
       console.error("Loi khi tu choi loi moi ket ban:", error)
+      throw error;
     } finally {
       set({ loading: false })
     }

@@ -27,8 +27,8 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       console.log("Connected socket");
     });
 
-    //oinline users
-    socket.on("online_users", (userIds) => {
+    //online users
+    socket.on("online-users", (userIds) => {
       set({ onlineUsers: userIds });
     });
 
@@ -39,7 +39,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       const lastMessage = {
         _id: conversation.lastMessage._id,
         content: conversation.lastMessage.content,
-        createAt: conversation.lastMessage.createAt,
+        createdAt: conversation.lastMessage.createdAt,
         sender: {
           _id: conversation.lastMessage.senderId,
           displayName: "",

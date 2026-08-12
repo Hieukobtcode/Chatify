@@ -2,7 +2,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useChatStore } from "@/stores/useChatStore"
 import type { Conversation } from "@/types/chat"
-import { Separator } from "@base-ui/react";
+import { Separator } from "@/components/ui/separator";
 import UserAvatar from "../../shared/UserAvatar";
 import StatusBadge from "../../shared/StatusBadge";
 import GroupChatAvatar from "../../sidebar/GroupChatAvatar";

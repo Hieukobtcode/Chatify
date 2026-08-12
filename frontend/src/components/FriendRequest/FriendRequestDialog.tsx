@@ -20,6 +20,8 @@ const FriendRequestDialog = ({ open, setOpen }: FriendRequestDialogProps) => {
   const { getAllFriendRequest } = useFriendStore();
 
   useEffect(() => {
+    if (!open) return;
+
     const loadRequest = async () => {
       try {
         await getAllFriendRequest();
@@ -29,23 +31,30 @@ const FriendRequestDialog = ({ open, setOpen }: FriendRequestDialogProps) => {
     };
 
     loadRequest();
-  }, []);
+  }, [open, getAllFriendRequest]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setTab("received");
+    }
+    setOpen(isOpen);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-lg">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Lời mời kết bạn</DialogTitle>
         </DialogHeader>
-        <Tabs value={tab} onValueChange={setTab} className={"w-full"}>
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={tab} onValueChange={setTab} className="w-full flex flex-col min-h-0 flex-1">
+          <TabsList className="grid w-full grid-cols-2 shrink-0">
             <TabsTrigger value="received">Đã nhận</TabsTrigger>
             <TabsTrigger value="sent">Đã gửi</TabsTrigger>
           </TabsList>
-          <TabsContent value="received">
+          <TabsContent value="received" className="overflow-y-auto flex-1 mt-3">
             <ReceivedRequest />
           </TabsContent>
-          <TabsContent value="sent">
+          <TabsContent value="sent" className="overflow-y-auto flex-1 mt-3">
             <SentRequest />
           </TabsContent>
         </Tabs>

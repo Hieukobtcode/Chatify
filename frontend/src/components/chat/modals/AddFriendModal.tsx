@@ -5,8 +5,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  SidebarGroupAction,
+} from "@/components/ui/sidebar";
 import { useFriendStore } from "@/stores/useFriendStore";
 import type { User } from "@/types/user";
 import { UserPlus } from "lucide-react";
@@ -20,6 +22,7 @@ export interface IFormValues {
 }
 
 const AddFriendModal = () => {
+  const [open, setOpen] = useState(false);
   const [isFound, setIsFound] = useState<boolean | null>(null);
   const [searchUser, setSearchUser] = useState<User>();
   const [searchedUserName, setsearchedUserName] = useState("");
@@ -74,51 +77,53 @@ const AddFriendModal = () => {
     reset();
     setsearchedUserName("");
     setIsFound(null);
+    setOpen(false);
   };
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <div
-          className="flex justify-center items-center size-5
-          rounded-full hover:bg-sidebar-accent cursor-pointer z-10"
-        >
-          <UserPlus className="size-4" />
-          <span className="sr-only">Kết bạn</span>
-        </div>
-      </DialogTrigger>
+    <>
+      <SidebarGroupAction
+        title="Kết bạn"
+        className="cursor-pointer"
+        onClick={() => setOpen(true)}
+      >
+        <UserPlus className="size-4" />
+        <span className="sr-only">Kết bạn</span>
+      </SidebarGroupAction>
 
-      <DialogContent className={"sm:max-w-[425px] border-none"}>
-        <DialogHeader>
-          <DialogTitle>Kết bạn</DialogTitle>
-        </DialogHeader>
-        {!isFound && (
-          <>
-            <SearchForm
-              register={register}
-              errors={errors}
-              usernameValue={usernameValue}
-              loading={loading}
-              isFound={isFound}
-              searchedUsername={searchedUserName}
-              onSubmit={handleSearch}
-              onCancel={handleCancel}
-            />
-          </>
-        )}
-        {isFound && (
-          <>
-            <SendFriendRequest
-              register={register}
-              loading={loading}
-              searchedUserName={searchedUserName}
-              onSubmit={handleSend}
-              onBack={() => setIsFound(null)}
-            />
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className={"sm:max-w-[425px] border-none"}>
+          <DialogHeader>
+            <DialogTitle>Kết bạn</DialogTitle>
+          </DialogHeader>
+          {!isFound && (
+            <>
+              <SearchForm
+                register={register}
+                errors={errors}
+                usernameValue={usernameValue}
+                loading={loading}
+                isFound={isFound}
+                searchedUsername={searchedUserName}
+                onSubmit={handleSearch}
+                onCancel={handleCancel}
+              />
+            </>
+          )}
+          {isFound && (
+            <>
+              <SendFriendRequest
+                register={register}
+                loading={loading}
+                searchedUserName={searchedUserName}
+                onSubmit={handleSend}
+                onBack={() => setIsFound(null)}
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

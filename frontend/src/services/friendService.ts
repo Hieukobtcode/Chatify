@@ -7,7 +7,7 @@ export const friendService = {
   },
 
   async sendFriendRequest(to: string, message?: string) {
-    const res = await api.post("/friend/request", { to, message });
+    const res = await api.post("/friends/requests", { to, message });
     return res.data.message;
   },
 
@@ -23,18 +23,20 @@ export const friendService = {
 
   async acceptRequest(requestId: string) {
     try {
-      const res = await api.post(`/friends/request/${requestId}/accept`);
-      return res.data.requestAcceptedBy;
+      const res = await api.post(`/friends/requests/${requestId}/accept`);
+      return res.data;
     } catch (error) {
       console.error("Loi khi gui accept request:", error);
+      throw error;
     }
   },
 
   async declineRequest(requestId: string) {
     try {
-      const res = await api.post(`/friends/request/${requestId}/decline`);
+      await api.post(`/friends/requests/${requestId}/decline`);
     } catch (error) {
-      console.error("Loi khi gui declien request:", error);
+      console.error("Loi khi gui decline request:", error);
+      throw error;
     }
   },
 

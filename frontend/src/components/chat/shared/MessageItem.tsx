@@ -34,11 +34,13 @@ const MessageItem = ({
   );
   return (
     <>
-      {/* Time */}
+      {/* Time divider - centered like Zalo/Messenger */}
       {isShowTime && (
-        <span className="text-xs text-muted-foreground px-1">
-          {formatMessageTime(new Date(message.createdAt))}
-        </span>
+        <div className="flex items-center justify-center my-3">
+          <span className="text-xs text-muted-foreground bg-muted/50 rounded-full px-3 py-0.5">
+            {formatMessageTime(new Date(message.createdAt))}
+          </span>
+        </div>
       )}
 
       <div

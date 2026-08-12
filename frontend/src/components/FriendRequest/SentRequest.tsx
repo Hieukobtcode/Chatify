@@ -12,17 +12,15 @@ const SentRequest = () => {
     );
   }
   return (
-    <div className="space-y-3 mt-4">
-      <>
-        {sendList.map((req) => (
-          <FriendRequestItem
-            key={req._id}
-            requestInfo={req}
-            type="sent"
-            actions={<p className="text-sm text-muted-foreground">Đang chờ trả lời...</p>}
-          />
-        ))}
-      </>
+    <div className="space-y-3">
+      {sendList.map((req) => (
+        <FriendRequestItem
+          key={req._id}
+          requestInfo={req}
+          type="sent"
+          actions={<p className="text-xs text-muted-foreground whitespace-nowrap">Đang chờ trả lời...</p>}
+        />
+      ))}
     </div>
   );
 };

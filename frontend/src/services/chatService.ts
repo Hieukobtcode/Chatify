@@ -15,8 +15,8 @@ export const chatService = {
     },
 
     async fetchMessage(id: string, cursor: string): Promise<FetchMessageProps> {
-        const res = await api.get(`/conversation/${id}/message?limit=${pageLimit}&cursor=${cursor}`)
-        return { messages: res.data.m.messages, cursor: res.data.nextCursor }
+        const res = await api.get(`/conversations/${id}/messages?limit=${pageLimit}&cursor=${cursor}`)
+        return { messages: res.data.messages, cursor: res.data.nextCursor }
     },
 
     async sendDirectMessage(recipientId: string, content: string = "", imgUrl?:string, conversationId?:string){
@@ -30,7 +30,7 @@ export const chatService = {
     },
 
     async markAsSeen(conversationId:string){
-        const res = await api.patch(`/conversation/${conversationId}/seen`);
+        const res = await api.patch(`/conversations/${conversationId}/seen`);
         return res.data;
     },
 

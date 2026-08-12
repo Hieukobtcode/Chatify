@@ -33,14 +33,13 @@ const ReceivedRequest = () => {
   };
 
   return (
-    <div className="space-y-3 mt-4 ">
+    <div className="space-y-3">
       {receivedList.map((r) => (
         <FriendRequestItem
           key={r._id}
           requestInfo={r}
           actions={
             <div className="flex gap-2">
-
               <Button
                 size={"sm"}
                 variant={"primary"}
@@ -57,10 +56,8 @@ const ReceivedRequest = () => {
               >
                 Từ chối
               </Button>
-
             </div>
           }
-
           type="received"
         />
       ))}

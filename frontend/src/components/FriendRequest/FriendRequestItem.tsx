@@ -13,23 +13,23 @@ const FriendRequestItem = ({
   type,
 }: RequestItemProps) => {
   if (!requestInfo) {
-    return;
+    return null;
   }
   const info = type === "sent" ? requestInfo.to : requestInfo.from;
 
   if (!info) {
-    return;
+    return null;
   }
   return (
-    <div className="flex items-center justify-center rounded-lg shadow-md border border-primary-foreground p-3">
-        <div className="flex items-center gap-3">
-            <UserAvatar type="sidebar" name={info.displayName} />
-            <div>
-                <p className="font-medium">{info.displayName}</p>
-                <p className="text-sm text-muted-foreground">@{info.username}</p>
-            </div>
-            {actions}
+    <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center gap-3 min-w-0">
+        <UserAvatar type="sidebar" name={info.displayName} avatarUrl={info.avatarUrl} />
+        <div className="min-w-0">
+          <p className="font-medium text-sm truncate">{info.displayName}</p>
+          <p className="text-xs text-muted-foreground truncate">@{info.username}</p>
         </div>
+      </div>
+      <div className="shrink-0 ml-3">{actions}</div>
     </div>
   );
 };

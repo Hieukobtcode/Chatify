@@ -20,7 +20,7 @@ const onlineUsers = new Map(); // {userId : socketId}
 
 io.on("connection", async (socket) => {
     const user = socket.user;
-    console.log(`${user.displayName} online voi soket ${socket.id}`);
+    // console.log(`${user.displayName} online voi soket ${socket.id}`);
 
     onlineUsers.set(user._id, socket.id);
 
