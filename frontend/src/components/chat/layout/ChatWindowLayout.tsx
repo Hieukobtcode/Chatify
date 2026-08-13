@@ -12,7 +12,6 @@ const ChatWindowLayout = () => {
     activeConversationId,
     conversations,
     messageLoading: loading,
-    messages,
     markAsSeen,
   } = useChatStore();
   const selectedConvo =

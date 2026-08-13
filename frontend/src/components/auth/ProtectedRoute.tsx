@@ -4,7 +4,7 @@ import { Navigate, Outlet } from "react-router";
 import { LoaderIcon } from "lucide-react";
 
 const ProtectedRoute = () => {
-  const { accessToken, user, loading, refresh, fetchMe, clearState } =
+  const { accessToken, loading, refresh, fetchMe, clearState } =
     useAuthStore();
   const [starting, setStarting] = useState(true);
   const initialized = useRef(false);
