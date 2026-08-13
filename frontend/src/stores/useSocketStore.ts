@@ -43,6 +43,8 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         fileUrl: conversation.lastMessage.fileUrl || null,
         fileName: conversation.lastMessage.fileName || null,
         fileType: conversation.lastMessage.fileType || null,
+        audioUrl: conversation.lastMessage.audioUrl || null,
+        audioDuration: conversation.lastMessage.audioDuration || null,
         createdAt: conversation.lastMessage.createdAt,
         sender: {
           _id: conversation.lastMessage.senderId,

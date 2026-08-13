@@ -23,6 +23,8 @@ export interface LastMessage {
   fileUrl?: string | null;
   fileName?: string | null;
   fileType?: string | null;
+  audioUrl?: string | null;
+  audioDuration?: number | null;
   createdAt: string;
   sender: {
     _id: string;
@@ -58,6 +60,8 @@ export interface Message {
   fileName?: string | null;
   fileSize?: number | null;
   fileType?: string | null;
+  audioUrl?: string | null;
+  audioDuration?: number | null;
   updatedAt?: string | null;
   createdAt: string;
   isOwn?: boolean;

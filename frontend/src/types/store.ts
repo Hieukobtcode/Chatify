@@ -1,6 +1,6 @@
 import type { Socket } from "socket.io-client";
 import type { Conversation, Message } from "./chat";
-import type { AttachmentPayload } from "../services/chatService";
+import type { AttachmentPayload, AudioPayload } from "../services/chatService";
 import type { Friend, FriendRequest, User } from "./user";
 
 export interface AuthState {
@@ -53,12 +53,14 @@ export interface ChatState {
     content: string,
     imgUrl?: string,
     attachment?: AttachmentPayload,
+    audio?: AudioPayload,
   ) => Promise<void>;
   sendGroupMessage: (
     conversationId: string,
     content: string,
     imgUrl?: string,
     attachment?: AttachmentPayload,
+    audio?: AudioPayload,
   ) => Promise<void>;
   //add message
   addMessage: (message: Message) => Promise<void>;

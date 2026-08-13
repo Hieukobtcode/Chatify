@@ -5,6 +5,7 @@ import {
   sendGroupMessage,
   uploadMessageImage,
   uploadMessageFile,
+  uploadMessageAudio,
 } from "../controllers/messageController.js";
 import {
   checkFriendship,
@@ -18,5 +19,6 @@ router.post("/direct", checkFriendship, sendDirectMessage);
 router.post("/group", checkGroupMembership, sendGroupMessage);
 router.post("/upload", upload.single("file"), uploadMessageImage);
 router.post("/upload-file", upload.single("file"), uploadMessageFile);
+router.post("/upload-audio", upload.single("file"), uploadMessageAudio);
 
 export default router;

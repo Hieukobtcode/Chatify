@@ -238,6 +238,8 @@ export const markAsSeen = async (req, res) => {
         fileUrl: updated?.lastMessage.fileUrl || null,
         fileName: updated?.lastMessage.fileName || null,
         fileType: updated?.lastMessage.fileType || null,
+        audioUrl: updated?.lastMessage.audioUrl || null,
+        audioDuration: updated?.lastMessage.audioDuration || null,
         createdAt: updated?.lastMessage.createdAt,
         sender: {
           _id: updated?.lastMessage.senderId
