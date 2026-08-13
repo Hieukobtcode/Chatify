@@ -1,10 +1,13 @@
 import { useChatStore } from '@/stores/useChatStore'
 import GropuMessageCard from './GropuMessageCard';
+import ChatListSkeleton from './ChatListSkeleton';
 
 const GroupChatList = () => {
-  const { conversations } = useChatStore();
+  const { conversations, convoLoading } = useChatStore();
 
-  if (!conversations) return;
+  if (convoLoading) {
+    return <ChatListSkeleton count={3} />;
+  }
 
   const groupConversations = conversations.filter((convo) => convo.type === "group");
 

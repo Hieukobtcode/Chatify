@@ -1,10 +1,13 @@
 import { useChatStore } from '@/stores/useChatStore'
 import DirectMessageCard from './DirectMessageCard';
+import ChatListSkeleton from './ChatListSkeleton';
 
 const DirectMesageList = () => {
-  const { conversations } = useChatStore();
+  const { conversations, convoLoading } = useChatStore();
 
-  if (!conversations) return;
+  if (convoLoading) {
+    return <ChatListSkeleton count={5} />;
+  }
 
   const directConversations = conversations.filter((convo) => convo.type === "direct");
 
