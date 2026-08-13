@@ -44,6 +44,18 @@ const lastMessageSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    fileUrl: {
+      type: String,
+      default: null,
+    },
+    fileName: {
+      type: String,
+      default: null,
+    },
+    fileType: {
+      type: String,
+      default: null,
+    },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
