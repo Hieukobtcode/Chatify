@@ -50,6 +50,11 @@ export interface ConversationResponse {
   conversations: Conversation[];
 }
 
+export interface Reaction {
+  userId: string;
+  emoji: string;
+}
+
 export interface Message {
   _id: string;
   conversationId: string;
@@ -62,6 +67,7 @@ export interface Message {
   fileType?: string | null;
   audioUrl?: string | null;
   audioDuration?: number | null;
+  reactions?: Reaction[];
   updatedAt?: string | null;
   createdAt: string;
   isOwn?: boolean;

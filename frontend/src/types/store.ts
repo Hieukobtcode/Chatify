@@ -1,5 +1,5 @@
 import type { Socket } from "socket.io-client";
-import type { Conversation, Message } from "./chat";
+import type { Conversation, Message, Reaction } from "./chat";
 import type { AttachmentPayload, AudioPayload } from "../services/chatService";
 import type { Friend, FriendRequest, User } from "./user";
 
@@ -64,6 +64,10 @@ export interface ChatState {
   ) => Promise<void>;
   //add message
   addMessage: (message: Message) => Promise<void>;
+
+  //reaction
+  toggleReaction: (messageId: string, emoji: string) => Promise<void>;
+  updateMessageReactions: (messageId: string, reactions: Reaction[]) => void;
 
   //update convo
   updateConversation: (conversation: Conversation) => void;

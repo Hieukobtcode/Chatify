@@ -38,6 +38,20 @@ const messageSchema = new mongoose.Schema(
     audioDuration: {
       type: Number,
     },
+    reactions: [
+      {
+        _id: false,
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        emoji: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
