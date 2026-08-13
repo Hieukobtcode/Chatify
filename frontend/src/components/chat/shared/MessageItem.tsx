@@ -43,12 +43,12 @@ const MessageItem = ({
         </div>
       )}
 
-      <div
-        className={cn(
-          "flex gap-2 message-bounce mt-1",
-          message.isOwn ? "justify-end" : "justify-start",
-        )}
-      >
+        <div
+          className={cn(
+            "flex gap-2 message-bounce mt-1",
+            message.isOwn ? "justify-end pr-3" : "justify-start",
+          )}
+        >
         {/* avatar */}
         {!message.isOwn && (
           <div className="w-8">
@@ -71,15 +71,24 @@ const MessageItem = ({
         >
           <Card
             className={cn(
-              "p-3",
+              message.imgUrl ? "p-1" : "p-3",
               message.isOwn
                 ? "chat-bubble-sent border-0"
                 : "chat-bubble-received",
             )}
           >
-            <p className="text-sm leading-relaxed break-words">
-              {message.content}
-            </p>
+            {message.imgUrl && (
+              <img
+                src={message.imgUrl}
+                alt="Ảnh tin nhắn"
+                className="h-auto w-56 max-w-full rounded-md object-cover"
+              />
+            )}
+            {message.content && (
+              <p className="text-sm leading-relaxed break-words">
+                {message.content}
+              </p>
+            )}
           </Card>
 
           {/* seen / delivered */}

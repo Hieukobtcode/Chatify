@@ -40,6 +40,10 @@ const lastMessageSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    imgUrl: {
+      type: String,
+      default: null,
+    },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

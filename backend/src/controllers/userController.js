@@ -41,7 +41,7 @@ export const uploadAvatar = async (req,res) => {
 
     const result = await uploadImageFromBuffer(file.buffer);
 
-    const updatedUser = User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
         avatarUrl:result.secure_url,
@@ -49,9 +49,9 @@ export const uploadAvatar = async (req,res) => {
       },{
         new:true,
       }
-    ).select("avartarUrl");
+    ).select("avatarUrl");
 
-    if(!updatedUser.avatarUrl){
+    if(!updatedUser || !updatedUser.avatarUrl){
       return res.status(400).json({message:"Avatar tra ve null"})
     }
 

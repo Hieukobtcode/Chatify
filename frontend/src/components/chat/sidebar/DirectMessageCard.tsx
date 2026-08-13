@@ -19,7 +19,9 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
     if (!otherUser) return null;
 
     const unreadCounts = convo.unreadCounts[user._id];
-    const lastMessage = convo.lastMessage?.content ?? "";
+    const lastMessage = convo.lastMessage?.imgUrl
+      ? "📷 Ảnh"
+      : convo.lastMessage?.content ?? "";
 
     const handleSelectConversation = async (id: string) => {
         setActiveConversation(id);

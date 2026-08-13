@@ -15,12 +15,15 @@ const EmojiPicker = ({onChange} : EmojiPicker) => {
         <PopoverTrigger className={"cursor-pointer"}>
             <Smile className="size-4"/>
         </PopoverTrigger>
-        <PopoverContent side="right" sideOffset={40} className="bg-tranparent border-none shadow-none drop-shadow-none mb-12">
-            <EmojiPickerReact
-            theme={isDark ? Theme.DARK : Theme.LIGHT} 
-            onEmojiClick={(emoji: EmojiClickData) => onChange(emoji.emoji)}
-            emojiStyle={EmojiStyle.NATIVE}
-            />
+        <PopoverContent side="top" align="end" sideOffset={8} className="w-auto max-w-[min(90vw,350px)] bg-transparent border-none shadow-none drop-shadow-none p-0">
+            <div className="w-[min(90vw,350px)]">
+                <EmojiPickerReact
+                theme={isDark ? Theme.DARK : Theme.LIGHT} 
+                onEmojiClick={(emoji: EmojiClickData) => onChange(emoji.emoji)}
+                emojiStyle={EmojiStyle.NATIVE}
+                width="100%"
+                />
+            </div>
         </PopoverContent>
     </Popover>
   )

@@ -4,16 +4,23 @@ import {
   emitNewMessage,
   updateConversationAfterCreateMessage,
 } from "../utils/messageHelper.js";
-import { io } from "../socket/index.js"; 
+import { io } from "../socket/index.js";
+import { uploadImageMessageFromBuffer } from "../middlewares/uploadMiddleware.js";
 
 export const sendDirectMessage = async (req, res) => {
   try {
-    const { recipientId, content, conversationId } = req.body;
+    const { recipientId, content, conversationId, imgUrl } = req.body;
     const senderId = req.user._id;
 
     let conversation;
 
-    if (!content) {
+    if (!conversationId && !recipientId) {
+      return res
+        .status(400)
+        .json({ message: "Thiếu recipientId hoặc conversationId" });
+    }
+
+    if ((!content || !content.trim()) && !imgUrl) {
       return res.status(400).json({ message: "Thiếu nội dung" });
     }
 
@@ -36,7 +43,8 @@ export const sendDirectMessage = async (req, res) => {
     const message = await Message.create({
       conversationId: conversation._id,
       senderId,
-      content,
+      content: content?.trim() ? content.trim() : null,
+      imgUrl: imgUrl || null,
     });
 
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -54,18 +62,19 @@ export const sendDirectMessage = async (req, res) => {
 
 export const sendGroupMessage = async (req, res) => {
   try {
-    const { conversationId, content } = req.body;
+    const { conversationId, content, imgUrl } = req.body;
     const senderId = req.user._id;
     const conversation = req.conversation;
 
-    if (!content) {
-      return res.status(400).json("Thiếu nội dung");
+    if ((!content || !content.trim()) && !imgUrl) {
+      return res.status(400).json({ message: "Thiếu nội dung" });
     }
 
     const message = await Message.create({
       conversationId,
       senderId,
-      content,
+      content: content?.trim() ? content.trim() : null,
+      imgUrl: imgUrl || null,
     });
 
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -77,5 +86,25 @@ export const sendGroupMessage = async (req, res) => {
   } catch (error) {
     console.error("Lỗi xảy ra khi gửi tin nhắn nhóm", error);
     return res.status(500).json({ message: "Lỗi hệ thống" });
+  }
+};
+
+export const uploadMessageImage = async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const result = await uploadImageMessageFromBuffer(file.buffer);
+
+    return res.status(200).json({
+      imgUrl: result.secure_url,
+      imgId: result.public_id,
+    });
+  } catch (error) {
+    console.error("Lỗi xảy ra khi upload ảnh tin nhắn:", error);
+    return res.status(500).json({ message: "Upload ảnh thất bại" });
   }
 };
