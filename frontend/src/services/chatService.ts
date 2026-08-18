@@ -8,6 +8,11 @@ export interface AttachmentPayload {
     fileType?: string;
 }
 
+export interface AudioPayload {
+    audioUrl: string;
+    audioDuration?: number;
+}
+
 interface FetchMessageProps {
     messages: Message[];
     cursor?: string
@@ -26,13 +31,13 @@ export const chatService = {
         return { messages: res.data.messages, cursor: res.data.nextCursor }
     },
 
-    async sendDirectMessage(recipientId: string, content: string = "", imgUrl?:string, conversationId?:string, attachment?: AttachmentPayload){
-        const res = await api.post("/messages/direct",{recipientId,content,imgUrl,conversationId,...attachment})
+    async sendDirectMessage(recipientId: string, content: string = "", imgUrl?:string, conversationId?:string, attachment?: AttachmentPayload, audio?: AudioPayload){
+        const res = await api.post("/messages/direct",{recipientId,content,imgUrl,conversationId,...attachment,...audio})
         return res.data.message
     },
 
-    async sendGroupMessage(conversationId:string,content:string = "",imgUrl?:string, attachment?: AttachmentPayload){
-        const res = await api.post("/messages/group",{conversationId,content,imgUrl,...attachment})
+    async sendGroupMessage(conversationId:string,content:string = "",imgUrl?:string, attachment?: AttachmentPayload, audio?: AudioPayload){
+        const res = await api.post("/messages/group",{conversationId,content,imgUrl,...attachment,...audio})
         return res.data.message
     },
 
@@ -54,6 +59,15 @@ export const chatService = {
         fileType: string;
     }> {
         const res = await api.post("/messages/upload-file", form);
+        return res.data;
+    },
+
+    async uploadMessageAudio(form: FormData): Promise<{
+        audioUrl: string;
+        audioId: string;
+        audioDuration: number;
+    }> {
+        const res = await api.post("/messages/upload-audio", form);
         return res.data;
     },
 

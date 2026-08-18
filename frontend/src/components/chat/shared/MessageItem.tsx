@@ -41,6 +41,13 @@ const MessageItem = ({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const formatDuration = (seconds?: number | null) => {
+    if (seconds == null) return "";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
   const downloadFile = async () => {
     if (!message.fileUrl) return;
 
@@ -112,6 +119,21 @@ const MessageItem = ({
                 alt="Ảnh tin nhắn"
                 className="h-auto w-56 max-w-full rounded-md object-cover"
               />
+            )}
+
+            {message.audioUrl && (
+              <div className="flex flex-col gap-1 py-1">
+                <audio
+                  src={message.audioUrl}
+                  controls
+                  className="h-10 w-56 max-w-full"
+                />
+                {message.audioDuration != null && (
+                  <span className="text-xs text-muted-foreground">
+                    {formatDuration(message.audioDuration)}
+                  </span>
+                )}
+              </div>
             )}
 
             {message.fileUrl && (

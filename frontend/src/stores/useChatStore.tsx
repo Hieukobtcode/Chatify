@@ -88,7 +88,13 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      sendDirectMessage: async (recipientId, content, imgUrl, attachment) => {
+      sendDirectMessage: async (
+        recipientId,
+        content,
+        imgUrl,
+        attachment,
+        audio,
+      ) => {
         try {
           const { activeConversationId } = get();
           await chatService.sendDirectMessage(
@@ -97,6 +103,7 @@ export const useChatStore = create<ChatState>()(
             imgUrl,
             activeConversationId || undefined,
             attachment,
+            audio,
           );
           set((state) => ({
             conversations: state.conversations.map((c) =>
@@ -108,13 +115,20 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      sendGroupMessage: async (conversationId, content, imgUrl, attachment) => {
+      sendGroupMessage: async (
+        conversationId,
+        content,
+        imgUrl,
+        attachment,
+        audio,
+      ) => {
         try {
           await chatService.sendGroupMessage(
             conversationId,
             content,
             imgUrl,
             attachment,
+            audio,
           );
           set((state) => ({
             conversations: state.conversations.map((c) =>

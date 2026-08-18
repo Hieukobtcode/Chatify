@@ -56,6 +56,14 @@ const lastMessageSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    audioUrl: {
+      type: String,
+      default: null,
+    },
+    audioDuration: {
+      type: Number,
+      default: null,
+    },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -7,7 +7,7 @@ Dưới đây là các ý tưởng nâng cấp trang web, được chia theo nh�
 ## 1. 💬 Nhắn tin & trải nghiệm chat
 
 - [x] **Gửi file đính kèm** (PDF, Word, ZIP...) bên cạnh ảnh — đã mở rộng `Message` model (`fileUrl`, `fileName`, `fileSize`, `fileType`), thêm endpoint upload file lên Cloudinary, cập nhật giao diện gửi/hiển thị file trong chat lẫn sidebar.
-- [ ] **Gửi tin nhắn thoại (voice message)** — thu âm bằng MediaRecorder API, upload rồi phát lại bằng HTML5 audio.
+- [x] **Gửi tin nhắn thoại (voice message)** — thu âm bằng MediaRecorder API, upload lên Cloudinary rồi phát lại bằng HTML5 audio. Đã thêm endpoint `upload-audio`, mở rộng model + giao diện thu/phát/nút gửi.
 - [ ] **Gọi video / thoại thời gian thực** — tích hợp WebRTC (peer-to-peer) song song với Socket.IO để trao đổi tín hiệu.
 - [ ] **Thu hồi tin nhắn (unsend)** — xóa hoặc ẩn tin nhắn cho tất cả thành viên trong đoạn hội thoại.
 - [ ] **Chỉnh sửa tin nhắn** — thêm cờ `isEdited` và lịch sử chỉnh sửa vào `Message`.

@@ -13,6 +13,8 @@ export const updateConversationAfterCreateMessage = (
       fileUrl: message.fileUrl || null,
       fileName: message.fileName || null,
       fileType: message.fileType || null,
+      audioUrl: message.audioUrl || null,
+      audioDuration: message.audioDuration || null,
       senderId,
       createdAt: message.createdAt,
     },

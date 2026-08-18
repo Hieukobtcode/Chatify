@@ -2,12 +2,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { Conversation } from "@/types/chat";
-import { FileText, ImagePlus, Paperclip, Send, X } from "lucide-react";
-import { useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import { FileText, ImagePlus, Mic, Paperclip, Send, Square, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import EmojiPicker from "../../shared/EmojiPicker";
 import { useChatStore } from "@/stores/useChatStore";
-import { chatService, type AttachmentPayload } from "@/services/chatService";
+import { chatService, type AttachmentPayload, type AudioPayload } from "@/services/chatService";
 import { toast } from "sonner";
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const formatDuration = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
 
 const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   const { user } = useAuthStore();
@@ -20,11 +32,37 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     size: number;
   } | null>(null);
   const [sending, setSending] = useState(false);
+
+  // voice recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioDuration, setAudioDuration] = useState(0);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startedAtRef = useRef<number>(0);
+
   const { sendDirectMessage, sendGroupMessage } = useChatStore();
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      stopMediaTracks();
+    };
+  }, []);
+
   if (!user) return;
+
+  const stopMediaTracks = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+  };
 
   const resetImage = () => {
     setImagePreview(null);
@@ -39,6 +77,14 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     if (attachInputRef.current) {
       attachInputRef.current.value = "";
     }
+  };
+
+  const resetAudio = () => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setAudioDuration(0);
+    setRecordingSeconds(0);
   };
 
   const handleSelectImage = () => {
@@ -75,13 +121,111 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     setAttachment({ file, name: file.name, size: file.size });
   };
 
+  const startRecording = async () => {
+    try {
+      if (!navigator.mediaDevices || !window.MediaRecorder) {
+        toast.error("Trình duyệt không hỗ trợ ghi âm");
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+          ? "audio/mp4"
+          : "";
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      chunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const type = mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type });
+        const duration = Math.round(
+          (Date.now() - startedAtRef.current) / 1000,
+        );
+
+        stopMediaTracks();
+
+        if (blob.size === 0) {
+          toast.error("Không thu được âm thanh");
+          setIsRecording(false);
+          return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        setAudioBlob(blob);
+        setAudioUrl(url);
+        setAudioDuration(duration);
+        setIsRecording(false);
+      };
+
+      startedAtRef.current = Date.now();
+      setRecordingSeconds(0);
+      setAudioBlob(null);
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+      setIsRecording(true);
+
+      recorder.start();
+
+      timerRef.current = setInterval(() => {
+        setRecordingSeconds(
+          Math.round((Date.now() - startedAtRef.current) / 1000),
+        );
+      }, 1000);
+    } catch (error) {
+      console.error("Lỗi khi truy cập micro:", error);
+      toast.error("Không thể truy cập microphone");
+      setIsRecording(false);
+    }
+  };
+
+  const stopRecording = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const cancelRecording = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.ondataavailable = null;
+      mediaRecorderRef.current.stop();
+    }
+    stopMediaTracks();
+    setIsRecording(false);
+    setRecordingSeconds(0);
+  };
+
   const sendMessage = async () => {
-    if ((!value.trim() && !imageFile && !attachment) || sending) return;
+    if ((!value.trim() && !imageFile && !attachment && !audioBlob) || sending)
+      return;
 
     setSending(true);
     try {
       let imgUrl: string | undefined;
       let attachmentPayload: AttachmentPayload | undefined;
+      let audioPayload: AudioPayload | undefined;
 
       if (imageFile) {
         const formData = new FormData();
@@ -102,10 +246,22 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
         };
       }
 
+      if (audioBlob) {
+        const ext = audioBlob.type.includes("mp4") ? "mp4" : "webm";
+        const formData = new FormData();
+        formData.append("file", audioBlob, `voice-${Date.now()}.${ext}`);
+        const uploaded = await chatService.uploadMessageAudio(formData);
+        audioPayload = {
+          audioUrl: uploaded.audioUrl,
+          audioDuration: uploaded.audioDuration || audioDuration,
+        };
+      }
+
       const content = value.trim();
       setValue("");
       resetImage();
       resetAttachment();
+      resetAudio();
 
       if (selectedConvo.type === "direct") {
         const participants = selectedConvo.participants;
@@ -116,6 +272,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
           content,
           imgUrl,
           attachmentPayload,
+          audioPayload,
         );
       } else {
         await sendGroupMessage(
@@ -123,6 +280,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
           content,
           imgUrl,
           attachmentPayload,
+          audioPayload,
         );
       }
     } catch (error) {
@@ -140,13 +298,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const hasContent = !!value.trim() || !!imageFile || !!attachment;
+  const hasContent = !!value.trim() || !!imageFile || !!attachment || !!audioBlob;
 
   return (
     <div className="flex flex-col gap-2 bg-background p-3">
@@ -184,6 +336,48 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             className="ml-1 flex size-6 items-center justify-center rounded-full text-muted-foreground transition-smooth hover:bg-foreground/10 hover:text-foreground"
           >
             <X className="size-3.5" />
+          </button>
+        </div>
+      )}
+
+      {audioUrl && !isRecording && (
+        <div className="flex items-center gap-2 self-start rounded-lg border border-border bg-muted/30 p-2 pr-3">
+          <audio src={audioUrl} controls className="h-10 max-w-56" />
+          <span className="text-xs text-muted-foreground">
+            {formatDuration(audioDuration)}
+          </span>
+          <button
+            type="button"
+            onClick={resetAudio}
+            className="ml-1 flex size-6 items-center justify-center rounded-full text-muted-foreground transition-smooth hover:bg-foreground/10 hover:text-foreground"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
+      )}
+
+      {isRecording && (
+        <div className="flex items-center gap-3 self-start rounded-lg border border-red-300 bg-red-50 p-2 pr-3">
+          <span className="relative flex size-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex size-3 rounded-full bg-red-500"></span>
+          </span>
+          <span className="text-sm font-medium text-red-600">
+            Đang ghi âm {formatDuration(recordingSeconds)}
+          </span>
+          <button
+            type="button"
+            onClick={cancelRecording}
+            className="ml-1 flex size-7 items-center justify-center rounded-full text-red-500 transition-smooth hover:bg-red-100"
+          >
+            <Trash2 className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={stopRecording}
+            className="flex size-7 items-center justify-center rounded-full bg-red-500 text-white transition-smooth hover:bg-red-600"
+          >
+            <Square className="size-3.5" />
           </button>
         </div>
       )}
@@ -240,13 +434,25 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
           </div>
         </div>
 
-        <Button
-          onClick={sendMessage}
-          className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105"
-          disabled={!hasContent || sending}
-        >
-          <Send className="size-4 text-white" />
-        </Button>
+        {!isRecording && !audioBlob ? (
+          <Button
+            onClick={startRecording}
+            variant="ghost"
+            size="icon"
+            className="hover:bg-primary/10 transition-smooth"
+            type="button"
+          >
+            <Mic className="size-4" />
+          </Button>
+        ) : (
+          <Button
+            onClick={sendMessage}
+            className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105"
+            disabled={!hasContent || sending}
+          >
+            <Send className="size-4 text-white" />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import { io } from "../socket/index.js";
 import {
   uploadImageMessageFromBuffer,
   uploadFileMessageFromBuffer,
+  uploadAudioMessageFromBuffer,
 } from "../middlewares/uploadMiddleware.js";
 
 export const sendDirectMessage = async (req, res) => {
@@ -23,6 +24,8 @@ export const sendDirectMessage = async (req, res) => {
       fileName,
       fileSize,
       fileType,
+      audioUrl,
+      audioDuration,
     } = req.body;
     const senderId = req.user._id;
 
@@ -34,7 +37,7 @@ export const sendDirectMessage = async (req, res) => {
         .json({ message: "Thiếu recipientId hoặc conversationId" });
     }
 
-    if ((!content || !content.trim()) && !imgUrl && !fileUrl) {
+    if ((!content || !content.trim()) && !imgUrl && !fileUrl && !audioUrl) {
       return res.status(400).json({ message: "Thiếu nội dung" });
     }
 
@@ -63,6 +66,8 @@ export const sendDirectMessage = async (req, res) => {
       fileName: fileName || null,
       fileSize: fileSize || null,
       fileType: fileType || null,
+      audioUrl: audioUrl || null,
+      audioDuration: audioDuration || null,
     });
 
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -88,11 +93,13 @@ export const sendGroupMessage = async (req, res) => {
       fileName,
       fileSize,
       fileType,
+      audioUrl,
+      audioDuration,
     } = req.body;
     const senderId = req.user._id;
     const conversation = req.conversation;
 
-    if ((!content || !content.trim()) && !imgUrl && !fileUrl) {
+    if ((!content || !content.trim()) && !imgUrl && !fileUrl && !audioUrl) {
       return res.status(400).json({ message: "Thiếu nội dung" });
     }
 
@@ -105,6 +112,8 @@ export const sendGroupMessage = async (req, res) => {
       fileName: fileName || null,
       fileSize: fileSize || null,
       fileType: fileType || null,
+      audioUrl: audioUrl || null,
+      audioDuration: audioDuration || null,
     });
 
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -136,6 +145,27 @@ export const uploadMessageImage = async (req, res) => {
   } catch (error) {
     console.error("Lỗi xảy ra khi upload ảnh tin nhắn:", error);
     return res.status(500).json({ message: "Upload ảnh thất bại" });
+  }
+};
+
+export const uploadMessageAudio = async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "No audio uploaded" });
+    }
+
+    const result = await uploadAudioMessageFromBuffer(file.buffer);
+
+    return res.status(200).json({
+      audioUrl: result.secure_url,
+      audioId: result.public_id,
+      audioDuration: result.duration || 0,
+    });
+  } catch (error) {
+    console.error("Lỗi xảy ra khi upload audio:", error);
+    return res.status(500).json({ message: "Upload audio thất bại" });
   }
 };
 

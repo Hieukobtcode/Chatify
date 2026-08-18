@@ -59,3 +59,20 @@ export const uploadFileMessageFromBuffer = (buffer, options) => {
         uploadStream.end(buffer);
     });
 };
+
+export const uploadAudioMessageFromBuffer = (buffer, options) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({
+            folder: "chatify_chat/audio",
+            resource_type: "video",
+            ...options,
+        }, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+        uploadStream.end(buffer);
+    });
+};
