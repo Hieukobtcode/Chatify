@@ -14,6 +14,8 @@ Chatify là ứng dụng nhắn tin thời gian thực (real-time chat) được
 - 💬 **Nhắn tin thời gian thực**
   - Chat 1-1 và chat nhóm qua Socket.IO.
   - Gửi emoji 🎉 và gửi ảnh 📷 (upload lên Cloudinary).
+  - Gửi file đính kèm 📎 (PDF, Word, ZIP...) và tin nhắn thoại 🎤 (voice message).
+  - Phản ứng cảm xúc (reaction) lên từng tin nhắn ❤️ 👍 😂.
   - Trạng thái tin nhắn `delivered` / `seen`.
   - Infinite scroll lịch sử tin nhắn.
 
@@ -218,6 +220,9 @@ Tài liệu Swagger có sẵn tại: `http://localhost:5001/api-docs`
 | POST | `/api/messages/direct` | Gửi tin nhắn trực tiếp |
 | POST | `/api/messages/group` | Gửi tin nhắn nhóm |
 | POST | `/api/messages/upload` | Upload ảnh tin nhắn |
+| POST | `/api/messages/upload-file` | Upload file đính kèm |
+| POST | `/api/messages/upload-audio` | Upload tin nhắn thoại |
+| POST | `/api/messages/:messageId/reaction` | Thêm/xóa phản ứng cảm xúc |
 
 ---
 
@@ -236,6 +241,7 @@ Tài liệu Swagger có sẵn tại: `http://localhost:5001/api-docs`
 | `online-users` | Danh sách userId đang online |
 | `new-message` | Có tin nhắn mới |
 | `read-message` | Tin nhắn đã được đọc |
+| `message-reaction` | Cập nhật phản ứng cảm xúc trên tin nhắn |
 | `new-group` | Có cuộc trò chuyện / nhóm mới |
 
 ---

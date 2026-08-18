@@ -270,6 +270,103 @@
           }
         }
       }
+    },
+    "/messages/upload": {
+      "post": {
+        "summary": "UploadMessageImage",
+        "tags": ["Messages"],
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/upload-file": {
+      "post": {
+        "summary": "UploadMessageFile",
+        "tags": ["Messages"],
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/upload-audio": {
+      "post": {
+        "summary": "UploadMessageAudio",
+        "tags": ["Messages"],
+        "responses": {},
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/{messageId}/reaction": {
+      "post": {
+        "summary": "ToggleMessageReaction",
+        "tags": ["Messages"],
+        "responses": {},
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emoji": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

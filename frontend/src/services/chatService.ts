@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import type { ConversationResponse, Message } from "@/types/chat";
+import type { ConversationResponse, Message, Reaction } from "@/types/chat";
 
 export interface AttachmentPayload {
     fileUrl: string;
@@ -68,6 +68,14 @@ export const chatService = {
         audioDuration: number;
     }> {
         const res = await api.post("/messages/upload-audio", form);
+        return res.data;
+    },
+
+    async toggleReaction(messageId: string, emoji: string): Promise<{
+        messageId: string;
+        reactions: Reaction[];
+    }> {
+        const res = await api.post(`/messages/${messageId}/reaction`, { emoji });
         return res.data;
     },
 

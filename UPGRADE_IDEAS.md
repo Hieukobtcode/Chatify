@@ -12,7 +12,7 @@ Dưới đây là các ý tưởng nâng cấp trang web, được chia theo nh�
 - [ ] **Thu hồi tin nhắn (unsend)** — xóa hoặc ẩn tin nhắn cho tất cả thành viên trong đoạn hội thoại.
 - [ ] **Chỉnh sửa tin nhắn** — thêm cờ `isEdited` và lịch sử chỉnh sửa vào `Message`.
 - [ ] **Trả lời / trích dẫn tin nhắn (reply)** — lưu `replyTo` để hiển thị bong bóng trả lời.
-- [ ] **Phản ứng cảm xúc (reaction)** — thả ❤️ 👍 😂 lên từng tin nhắn, lưu mảng reactions.
+- [x] **Phản ứng cảm xúc (reaction)** — thả ❤️ 👍 😂 😮 😢 😡 lên từng tin nhắn. Đã thêm mảng `reactions` vào model, API `/:messageId/reaction`, socket event `message-reaction` và UI hiển thị/thêm/xóa reaction trên từng tin nhắn.
 - [ ] **Ghim tin nhắn (pin)** — ghim thông báo quan trọng trong nhóm.
 - [ ] **Chia sẻ vị trí (location)** — sử dụng Geolocation API và hiển thị bản đồ.
 - [ ] **Gửi sticker / GIF** — tích hợp GIPHY hoặc bộ sticker.

@@ -6,6 +6,7 @@ import {
   uploadMessageImage,
   uploadMessageFile,
   uploadMessageAudio,
+  toggleMessageReaction,
 } from "../controllers/messageController.js";
 import {
   checkFriendship,
@@ -20,5 +21,6 @@ router.post("/group", checkGroupMembership, sendGroupMessage);
 router.post("/upload", upload.single("file"), uploadMessageImage);
 router.post("/upload-file", upload.single("file"), uploadMessageFile);
 router.post("/upload-audio", upload.single("file"), uploadMessageAudio);
+router.post("/:messageId/reaction", toggleMessageReaction);
 
 export default router;

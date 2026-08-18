@@ -434,7 +434,15 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
           </div>
         </div>
 
-        {!isRecording && !audioBlob ? (
+        {hasContent ? (
+          <Button
+            onClick={sendMessage}
+            className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105"
+            disabled={sending}
+          >
+            <Send className="size-4 text-white" />
+          </Button>
+        ) : isRecording ? null : (
           <Button
             onClick={startRecording}
             variant="ghost"
@@ -443,14 +451,6 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
             type="button"
           >
             <Mic className="size-4" />
-          </Button>
-        ) : (
-          <Button
-            onClick={sendMessage}
-            className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105"
-            disabled={!hasContent || sending}
-          >
-            <Send className="size-4 text-white" />
           </Button>
         )}
       </div>

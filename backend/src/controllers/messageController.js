@@ -200,3 +200,73 @@ export const uploadMessageFile = async (req, res) => {
     return res.status(500).json({ message: "Upload file thất bại" });
   }
 };
+
+const formatReactions = (reactions) =>
+  (reactions || []).map((r) => ({
+    userId: r.userId.toString(),
+    emoji: r.emoji,
+  }));
+
+export const toggleMessageReaction = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { emoji } = req.body;
+    const userId = req.user._id;
+
+    if (!emoji || typeof emoji !== "string") {
+      return res.status(400).json({ message: "Thiếu emoji" });
+    }
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Không tìm thấy tin nhắn" });
+    }
+
+    if (!Array.isArray(message.reactions)) {
+      message.reactions = [];
+    }
+
+    const conversation = await Conversation.findById(message.conversationId);
+    if (!conversation) {
+      return res.status(404).json({ message: "Không tìm thấy cuộc trò chuyện" });
+    }
+
+    const isMember = conversation.participants.some(
+      (p) => p.userId.toString() === userId.toString()
+    );
+    if (!isMember) {
+      return res.status(403).json({ message: "Bạn không ở trong cuộc trò chuyện này" });
+    }
+
+    const existingIndex = message.reactions.findIndex(
+      (r) => r.userId.toString() === userId.toString()
+    );
+
+    if (existingIndex !== -1) {
+      if (message.reactions[existingIndex].emoji === emoji) {
+        message.reactions.splice(existingIndex, 1);
+      } else {
+        message.reactions[existingIndex].emoji = emoji;
+      }
+    } else {
+      message.reactions.push({ userId, emoji });
+    }
+
+    await message.save();
+
+    const reactions = formatReactions(message.reactions);
+
+    io.to(message.conversationId.toString()).emit("message-reaction", {
+      messageId: message._id.toString(),
+      reactions,
+    });
+
+    return res.status(200).json({
+      messageId: message._id.toString(),
+      reactions,
+    });
+  } catch (error) {
+    console.error("Lỗi xảy ra khi reaction tin nhắn:", error);
+    return res.status(500).json({ message: "Lỗi hệ thống" });
+  }
+};

@@ -182,6 +182,32 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
+      toggleReaction: async (messageId, emoji) => {
+        try {
+          const res = await chatService.toggleReaction(messageId, emoji);
+          get().updateMessageReactions(res.messageId, res.reactions);
+        } catch (error) {
+          console.error("Lỗi xảy ra khi reaction:", error);
+        }
+      },
+
+      updateMessageReactions: (messageId, reactions) => {
+        set((state) => {
+          const nextMessages: ChatState["messages"] = {};
+
+          for (const [convoId, convo] of Object.entries(state.messages)) {
+            nextMessages[convoId] = {
+              ...convo,
+              items: convo.items.map((m) =>
+                m._id === messageId ? { ...m, reactions } : m,
+              ),
+            };
+          }
+
+          return { messages: nextMessages };
+        });
+      },
+
       updateConversation: (conversation) => {
         set((state) => ({
           conversations: state.conversations.map((c) =>
