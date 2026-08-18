@@ -1,4 +1,5 @@
 import { chatService } from "@/services/chatService";
+import type { AttachmentPayload } from "@/services/chatService";
 import type { ChatState } from "@/types/store";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -87,7 +88,7 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      sendDirectMessage: async (recipientId, content, imgUrl) => {
+      sendDirectMessage: async (recipientId, content, imgUrl, attachment) => {
         try {
           const { activeConversationId } = get();
           await chatService.sendDirectMessage(
@@ -95,6 +96,7 @@ export const useChatStore = create<ChatState>()(
             content,
             imgUrl,
             activeConversationId || undefined,
+            attachment,
           );
           set((state) => ({
             conversations: state.conversations.map((c) =>
@@ -106,9 +108,14 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      sendGroupMessage: async (conversationId, content, imgUrl) => {
+      sendGroupMessage: async (conversationId, content, imgUrl, attachment) => {
         try {
-          await chatService.sendGroupMessage(conversationId, content, imgUrl);
+          await chatService.sendGroupMessage(
+            conversationId,
+            content,
+            imgUrl,
+            attachment,
+          );
           set((state) => ({
             conversations: state.conversations.map((c) =>
               c._id === get().activeConversationId ? { ...c, seenBy: [] } : c,

@@ -3,6 +3,7 @@ import type { Conversation, Message, Participant } from "@/types/chat";
 import UserAvatar from "./UserAvatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FileText, Download } from "lucide-react";
 
 interface MessageItemProps {
   message: Message;
@@ -32,6 +33,34 @@ const MessageItem = ({
   const participant = selectedConvo.participants.find(
     (p: Participant) => p._id.toString() === message.senderId.toString(),
   );
+
+  const formatFileSize = (bytes?: number | null) => {
+    if (bytes == null) return "";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const downloadFile = async () => {
+    if (!message.fileUrl) return;
+
+    try {
+      const res = await fetch(message.fileUrl);
+      const blob = await res.blob();
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = message.fileName || "attachment";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Lỗi khi tải file:", error);
+    }
+  };
+
   return (
     <>
       {/* Time divider - centered like Zalo/Messenger */}
@@ -84,6 +113,28 @@ const MessageItem = ({
                 className="h-auto w-56 max-w-full rounded-md object-cover"
               />
             )}
+
+            {message.fileUrl && (
+              <button
+                type="button"
+                onClick={downloadFile}
+                className="flex items-center gap-3 rounded-md p-2 hover:bg-foreground/5 transition-smooth"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <FileText className="size-5 text-primary" />
+                </div>
+                <div className="flex min-w-0 flex-col">
+                  <span className="max-w-52 truncate text-sm font-medium">
+                    {message.fileName || "Tệp đính kèm"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatFileSize(message.fileSize)}
+                  </span>
+                </div>
+                <Download className="size-4 shrink-0 text-muted-foreground" />
+              </button>
+            )}
+
             {message.content && (
               <p className="text-sm leading-relaxed break-words">
                 {message.content}

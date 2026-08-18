@@ -1,15 +1,29 @@
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
+import path from "path";
+import { randomUUID } from "crypto";
 import {
   emitNewMessage,
   updateConversationAfterCreateMessage,
 } from "../utils/messageHelper.js";
 import { io } from "../socket/index.js";
-import { uploadImageMessageFromBuffer } from "../middlewares/uploadMiddleware.js";
+import {
+  uploadImageMessageFromBuffer,
+  uploadFileMessageFromBuffer,
+} from "../middlewares/uploadMiddleware.js";
 
 export const sendDirectMessage = async (req, res) => {
   try {
-    const { recipientId, content, conversationId, imgUrl } = req.body;
+    const {
+      recipientId,
+      content,
+      conversationId,
+      imgUrl,
+      fileUrl,
+      fileName,
+      fileSize,
+      fileType,
+    } = req.body;
     const senderId = req.user._id;
 
     let conversation;
@@ -20,7 +34,7 @@ export const sendDirectMessage = async (req, res) => {
         .json({ message: "Thiếu recipientId hoặc conversationId" });
     }
 
-    if ((!content || !content.trim()) && !imgUrl) {
+    if ((!content || !content.trim()) && !imgUrl && !fileUrl) {
       return res.status(400).json({ message: "Thiếu nội dung" });
     }
 
@@ -45,6 +59,10 @@ export const sendDirectMessage = async (req, res) => {
       senderId,
       content: content?.trim() ? content.trim() : null,
       imgUrl: imgUrl || null,
+      fileUrl: fileUrl || null,
+      fileName: fileName || null,
+      fileSize: fileSize || null,
+      fileType: fileType || null,
     });
 
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -62,11 +80,19 @@ export const sendDirectMessage = async (req, res) => {
 
 export const sendGroupMessage = async (req, res) => {
   try {
-    const { conversationId, content, imgUrl } = req.body;
+    const {
+      conversationId,
+      content,
+      imgUrl,
+      fileUrl,
+      fileName,
+      fileSize,
+      fileType,
+    } = req.body;
     const senderId = req.user._id;
     const conversation = req.conversation;
 
-    if ((!content || !content.trim()) && !imgUrl) {
+    if ((!content || !content.trim()) && !imgUrl && !fileUrl) {
       return res.status(400).json({ message: "Thiếu nội dung" });
     }
 
@@ -75,6 +101,10 @@ export const sendGroupMessage = async (req, res) => {
       senderId,
       content: content?.trim() ? content.trim() : null,
       imgUrl: imgUrl || null,
+      fileUrl: fileUrl || null,
+      fileName: fileName || null,
+      fileSize: fileSize || null,
+      fileType: fileType || null,
     });
 
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -106,5 +136,37 @@ export const uploadMessageImage = async (req, res) => {
   } catch (error) {
     console.error("Lỗi xảy ra khi upload ảnh tin nhắn:", error);
     return res.status(500).json({ message: "Upload ảnh thất bại" });
+  }
+};
+
+export const uploadMessageFile = async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const ext = path.extname(file.originalname);
+    const baseName = path
+      .basename(file.originalname, ext)
+      .replace(/[^a-zA-Z0-9_-]/g, "")
+      .slice(0, 80);
+    const publicId = `${baseName || "file"}-${randomUUID()}${ext}`;
+
+    const result = await uploadFileMessageFromBuffer(file.buffer, {
+      public_id: publicId,
+    });
+
+    return res.status(200).json({
+      fileUrl: result.secure_url,
+      fileId: result.public_id,
+      fileName: file.originalname,
+      fileSize: file.size,
+      fileType: file.mimetype,
+    });
+  } catch (error) {
+    console.error("Lỗi xảy ra khi upload file:", error);
+    return res.status(500).json({ message: "Upload file thất bại" });
   }
 };

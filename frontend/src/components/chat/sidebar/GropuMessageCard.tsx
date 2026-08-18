@@ -13,9 +13,11 @@ const GropuMessageCard = ({ convo }: { convo: Conversation }) => {
 
     const unreadCounts = convo.unreadCounts[user._id];
     const name = convo.group?.name ?? "";
-    const lastMessage = convo.lastMessage?.imgUrl
-      ? "📷 Ảnh"
-      : convo.lastMessage?.content ?? "Chưa có tin nhắn";
+    const lastMessage = convo.lastMessage?.fileUrl
+      ? `📎 ${convo.lastMessage?.fileName || "Tệp đính kèm"}`
+      : convo.lastMessage?.imgUrl
+        ? "📷 Ảnh"
+        : convo.lastMessage?.content ?? "Chưa có tin nhắn";
 
     const handleSelectConversation = async (id: string) => {
         setActiveConversation(id);
