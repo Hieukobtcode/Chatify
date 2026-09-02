@@ -4,6 +4,7 @@ import type { Conversation } from '@/types/chat'
 import ChatCard from '../shared/ChatCard';
 import UnreadCountBadge from '../shared/UnreadCountBadge';
 import GroupChatAvatar from './GroupChatAvatar';
+import { memo } from 'react';
 
 const GropuMessageCard = ({ convo }: { convo: Conversation }) => {
     const { user } = useAuthStore();
@@ -50,4 +51,7 @@ const GropuMessageCard = ({ convo }: { convo: Conversation }) => {
     )
 }
 
-export default GropuMessageCard
+// Memo để tránh re-render khi conversations khác thay đổi
+export default memo(GropuMessageCard, (prev, next) => {
+  return prev.convo._id === next.convo._id && prev.convo.lastMessage?._id === next.convo.lastMessage?._id;
+})

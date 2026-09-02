@@ -15,13 +15,15 @@ import swaggerUi from "swagger-ui-express";
 import fs from "fs";
 import { app, server } from "./socket/index.js";
 import { v2 as cloudinary } from "cloudinary";
+import compression from "compression";
 
 dotenv.config();
 
 const PORT = process.env.PORT || 5001;
 
 // middlewares
-app.use(express.json());
+app.use(compression()); // nén gzip response - giảm tải băng thông
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 
@@ -32,7 +34,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-//Swagger
+//Swagger - load async để không chặn khởi động
 const swaggerDocument = JSON.parse(
   fs.readFileSync("./src/swagger.json", "utf8"),
 );
@@ -47,6 +49,11 @@ app.use("/api/users", userRoute);
 app.use("/api/friends", friendRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/conversations", conversationRoute);
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 connectDB().then(() => {
   server.listen(PORT, () => {

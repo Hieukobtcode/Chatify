@@ -1,7 +1,7 @@
 import { useChatStore } from "@/stores/useChatStore";
 import ChatWelcomeScreen from "../ChatWelcomeScreeen";
 import MessageItem from "../../shared/MessageItem";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Infinitive from "react-infinite-scroll-component";
 
 const ChatWindowBody = () => {
@@ -19,10 +19,13 @@ const ChatWindowBody = () => {
   const key = `chat-scroll-${activeConversationId}`;
   const hasMore = allMessages[activeConversationId!]?.hasMore ?? false;
   const messages = allMessages[activeConversationId!]?.items ?? [];
-  const reversedMessages = [...messages].reverse();
 
-  const selectedConvo = conversations.find(
-    (c) => c._id === activeConversationId,
+  // useMemo để tránh tạo mảng mới mỗi render
+  const reversedMessages = useMemo(() => [...messages].reverse(), [messages]);
+
+  const selectedConvo = useMemo(
+    () => conversations.find((c) => c._id === activeConversationId),
+    [conversations, activeConversationId],
   );
 
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,7 @@ const ChatWindowBody = () => {
     return <ChatWelcomeScreen />;
   }
 
-  const fetchMoreMessage = async () => {
+  const fetchMoreMessage = useCallback(async () => {
     if (!activeConversationId) {
       return;
     }
@@ -75,9 +78,9 @@ const ChatWindowBody = () => {
     } catch (error) {
       console.error("Loi xay ra khi fetch them tin nhan:", error);
     }
-  };
+  }, [activeConversationId, fetchMessage]);
 
-  const handleScrollSave = () => {
+  const handleScrollSave = useCallback(() => {
     const container = containerRef.current;
     if (!container || !activeConversationId) {
       return;
@@ -90,7 +93,7 @@ const ChatWindowBody = () => {
         scrollHeight: container.scrollHeight,
       }),
     );
-  };
+  }, [key, activeConversationId]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;

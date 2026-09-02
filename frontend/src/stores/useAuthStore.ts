@@ -65,8 +65,11 @@ export const useAuthStore = create<AuthState>()(
         const { accessToken } = await authService.signIn(username, password);
         get().setAccessToken(accessToken);
 
-        await get().fetchMe();
-        useChatStore.getState().fetchConversatons();
+        // Fetch song song để tăng tốc độ load
+        await Promise.all([
+          get().fetchMe(),
+          useChatStore.getState().fetchConversatons(),
+        ]);
 
         toast.success("Chào mừng bạn quay lại với Chatify!");
         return true;

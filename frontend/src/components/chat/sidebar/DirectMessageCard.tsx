@@ -7,6 +7,7 @@ import UserAvatar from "../shared/UserAvatar";
 import StatusBadge from "../shared/StatusBadge";
 import UnreadCountBadge from "../shared/UnreadCountBadge";
 import { useSocketStore } from "@/stores/useSocketStore";
+import { memo } from "react";
 
 const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
     const { user } = useAuthStore();
@@ -61,4 +62,7 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
     )
 }
 
-export default DirectMessageCard
+// Memo để tránh re-render khi conversations khác thay đổi
+export default memo(DirectMessageCard, (prev, next) => {
+  return prev.convo._id === next.convo._id && prev.convo.lastMessage?._id === next.convo.lastMessage?._id;
+})

@@ -19,6 +19,11 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     const socket: Socket = io(baseURL, {
       auth: { token: accessToken },
       transports: ["websocket"],
+      // Giảm thời gian kết nối lại
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
     });
 
     set({ socket });
@@ -27,9 +32,24 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       console.log("Connected socket");
     });
 
-    //online users
+    //online users - nhận danh sách ban đầu
     socket.on("online-users", (userIds) => {
       set({ onlineUsers: userIds });
+    });
+
+    //user online - thêm user vào danh sách
+    socket.on("user-online", (userId) => {
+      set((state) => {
+        if (state.onlineUsers.includes(userId)) return state;
+        return { onlineUsers: [...state.onlineUsers, userId] };
+      });
+    });
+
+    //user offline - xoá user khỏi danh sách
+    socket.on("user-offline", (userId) => {
+      set((state) => ({
+        onlineUsers: state.onlineUsers.filter((id) => id !== userId),
+      }));
     });
 
     //new message
@@ -90,15 +110,13 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       useChatStore.getState().addConvo(conversation);
       socket.emit("join-conversation",conversation._id);
     });
-
-
   },
 
   disconnectSocket: () => {
     const socket = get().socket;
     if (socket) {
       socket.disconnect();
-      set({ socket: null });
+      set({ socket: null, onlineUsers: [] });
     }
   },
 }));

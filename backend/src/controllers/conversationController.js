@@ -2,6 +2,18 @@ import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
 import { io } from "../socket/index.js";
 
+const PARTICIPANT_SELECT = "displayName avatarUrl";
+const CONVERSATION_SELECT = {
+  type: 1,
+  participants: 1,
+  group: 1,
+  lastMessageAt: 1,
+  seenBy: 1,
+  lastMessage: 1,
+  unreadCounts: 1,
+  updatedAt: 1,
+};
+
 export const createConversation = async (req, res) => {
   try {
     const { type, name, memberIds } = req.body;
@@ -27,7 +39,7 @@ export const createConversation = async (req, res) => {
       conversation = await Conversation.findOne({
         type: "direct",
         "participants.userId": { $all: [userId, participantId] },
-      });
+      }).lean();
 
       if (!conversation) {
         conversation = new Conversation({
@@ -58,23 +70,21 @@ export const createConversation = async (req, res) => {
       return res.status(400).json({ message: "Conversation type không hợp lệ" });
     }
 
-    await conversation.populate([
-      { path: "participants.userId", select: "displayName avatarUrl" },
-      {
-        path: "seenBy",
-        select: "displayName avatarUrl",
-      },
-      { path: "lastMessage.senderId", select: "displayName avatarUrl" },
+    // Populate thông tin participants
+    const populated = await Conversation.populate(conversation, [
+      { path: "participants.userId", select: PARTICIPANT_SELECT },
+      { path: "seenBy", select: PARTICIPANT_SELECT },
+      { path: "lastMessage.senderId", select: PARTICIPANT_SELECT },
     ]);
 
-    const participants = (conversation.participants || []).map((p) => ({
+    const participants = (populated.participants || []).map((p) => ({
       _id: p.userId?._id,
       displayName: p.userId?.displayName,
       avatarUrl: p.userId?.avatarUrl ?? null,
       joinedAt: p.joinedAt,
     }));
 
-    const formatted = { ...conversation.toObject(), participants };
+    const formatted = { ...populated, participants };
 
     if (type === "group") {
       memberIds.forEach((userId) => {
@@ -97,22 +107,24 @@ export const createConversation = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const userId = req.user._id;
-    const conversations = await Conversation.find({
-      "participants.userId": userId,
-    })
+    const conversations = await Conversation.find(
+      { "participants.userId": userId },
+      CONVERSATION_SELECT
+    )
       .sort({ lastMessageAt: -1, updatedAt: -1 })
       .populate({
         path: "participants.userId",
-        select: "displayName avatarUrl",
+        select: PARTICIPANT_SELECT,
       })
       .populate({
         path: "lastMessage.senderId",
-        select: "displayName avatarUrl",
+        select: PARTICIPANT_SELECT,
       })
       .populate({
         path: "seenBy",
-        select: "displayName avatarUrl",
-      });
+        select: PARTICIPANT_SELECT,
+      })
+      .lean();
 
     const formatted = conversations.map((convo) => {
       const participants = (convo.participants || []).map((p) => ({
@@ -123,7 +135,7 @@ export const getConversations = async (req, res) => {
       }));
 
       return {
-        ...convo.toObject(),
+        ...convo,
         unreadCounts: convo.unreadCounts || {},
         participants,
       };
@@ -147,9 +159,24 @@ export const getMessages = async (req, res) => {
       query.createdAt = { $lt: new Date(cursor) };
     }
 
-    let messages = await Message.find(query)
+    // Chỉ lấy các field cần thiết, dùng lean() để tăng tốc
+    let messages = await Message.find(query, {
+      conversationId: 1,
+      senderId: 1,
+      content: 1,
+      imgUrl: 1,
+      fileUrl: 1,
+      fileName: 1,
+      fileSize: 1,
+      fileType: 1,
+      audioUrl: 1,
+      audioDuration: 1,
+      reactions: 1,
+      createdAt: 1,
+    })
       .sort({ createdAt: -1 })
-      .limit(Number(limit) + 1);
+      .limit(Number(limit) + 1)
+      .lean();
 
     let nextCursor = null;
 
@@ -176,7 +203,7 @@ export const getUserConversationsForSocketIO = async (userId) => {
     const conversations = await Conversation.find(
       { "participants.userId": userId },
       { _id: 1 },
-    );
+    ).lean();
 
     return conversations.map((c) => c._id.toString());
   } catch (error) {
@@ -215,9 +242,9 @@ export const markAsSeen = async (req, res) => {
       new: true
     }
     ).populate([
-      { path: "participants.userId", select: "displayName avatarUrl" },
-      { path: "lastMessage.senderId", select: "displayName avatarUrl" },
-    ])
+      { path: "participants.userId", select: PARTICIPANT_SELECT },
+      { path: "lastMessage.senderId", select: PARTICIPANT_SELECT },
+    ]).lean()
 
     const formattedParticipants = (updated.participants || []).map((p) => ({
       _id: p.userId?._id,
@@ -228,7 +255,7 @@ export const markAsSeen = async (req, res) => {
 
     io.to(conversationId).emit("read-message", {
       conversation: {
-        ...updated.toObject(),
+        ...updated,
         participants: formattedParticipants,
       },
       lastMessage: {

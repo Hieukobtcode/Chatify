@@ -4,7 +4,7 @@ import UserAvatar from "./UserAvatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, SmilePlus } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useChatStore } from "@/stores/useChatStore";
 
@@ -151,6 +151,8 @@ const MessageItem = ({
                 <img
                   src={message.imgUrl}
                   alt="Ảnh tin nhắn"
+                  loading="lazy"
+                  decoding="async"
                   className="h-auto w-56 max-w-full rounded-md object-cover"
                 />
               )}
@@ -160,6 +162,7 @@ const MessageItem = ({
                   <audio
                     src={message.audioUrl}
                     controls
+                    preload="none"
                     className="h-10 w-56 max-w-full"
                   />
                   {message.audioDuration != null && (
@@ -266,4 +269,12 @@ const MessageItem = ({
   );
 };
 
-export default MessageItem;
+// Memo để tránh re-render không cần thiết khi messages khác thay đổi
+export default memo(MessageItem, (prev, next) => {
+  // Chỉ re-render khi message, index, hoặc lastMessageStatus thay đổi
+  if (prev.message !== next.message) return false;
+  if (prev.index !== next.index) return false;
+  if (prev.lastMessageStatus !== next.lastMessageStatus) return false;
+  if (prev.selectedConvo?.lastMessage?._id !== next.selectedConvo?.lastMessage?._id) return false;
+  return true;
+});
